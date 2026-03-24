@@ -51,7 +51,6 @@
 ([1-7]|[567]\.5)        return RSTNUM_VALUE;
 [0-9A-Fa-f]{2}[Hh]    return DATA_VALUE;
 [0-9A-Fa-f]{4}[Hh]    return DATA16_VALUE;
-[0-9A-Fa-f]+[Hh]      return ADDRESS;
 [ \t\r\n]+            /* ignore */ 
 ;.*                 /* ignore */;
 .                     return yytext[0];

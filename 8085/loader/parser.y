@@ -132,7 +132,7 @@ DATA16:
     ;
 
 ADDR:
-      ADDRESS
+      DATA16_VALUE 
     ;
 %%
 
