@@ -1,0 +1,11 @@
+*.o
+emulator
+loader/lex.yy.c
+loader/parser.tab.c
+loader/parser.tab.h
+emu_objs/
+pars_objs/
+*.exe
+*.out
+*.log
+test.asm
