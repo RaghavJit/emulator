@@ -1,1 +1,3 @@
 LDA 1234H
+MOV A, B
+MVI A, 12H;

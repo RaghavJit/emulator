@@ -52,12 +52,14 @@ int yylex();
 %token DATA_VALUE
 %token DATA16_VALUE
 %token ADDRESS
+%token COMMA_VAL
+%token SEMCOL_VAL
 
 %%
 S: 
-      S X0
-    | S X1
-    | S X2
+     S X0 SEMCOL
+    | S X1 SEMCOL
+    | S X2 SEMCOL
     | 
     ;
 
@@ -77,7 +79,7 @@ X0:
     ;
 
 X1:
-      PUSH_TOKEN DATA
+     PUSH_TOKEN DATA
     | LDA_TOKEN ADDR            
     | STA_TOKEN ADDR            
     | LHLD_TOKEN ADDR           
@@ -96,14 +98,14 @@ X1:
     ;
 
 X2:
-      MOV_TOKEN REG REG         
-    | MVI_TOKEN REG DATA        
-    | LXI_TOKEN REGPAIR DATA16  
+     MOV_TOKEN REG COMMA REG         
+    | MVI_TOKEN REG COMMA DATA        
+    | LXI_TOKEN REGPAIR COMMA DATA16  
     ;
     
 
 REG:
-      A_REG
+     A_REG
     | B_REG
     | C_REG
     | D_REG
@@ -113,7 +115,7 @@ REG:
     ;
 
 REGPAIR:
-      BC_REG
+     BC_REG
     | DE_REG
     | HL_REG
     | SP_REG
@@ -134,6 +136,16 @@ DATA16:
 ADDR:
       DATA16_VALUE 
     ;
+
+COMMA: 
+      
+      | COMMA_VAL
+      ;
+
+SEMCOL: 
+      
+      | SEMCOL_VAL
+      ;
 %%
 
 void yyerror(const char* s) {
