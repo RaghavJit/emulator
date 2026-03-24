@@ -52,9 +52,8 @@
 [0-9A-Fa-f]{2}[Hh]    return DATA_VALUE;
 [0-9A-Fa-f]{4}[Hh]    return DATA16_VALUE;
 [0-9A-Fa-f]+[Hh]      return ADDRESS;
-[0-7]                return DATA_VALUE;
-[ \t\r\n]+            /* ignore */;
-";".*                 /* ignore */;
+[ \t\r\n]+            /* ignore */ 
+;.*                 /* ignore */;
 .                     return yytext[0];
 
 %%

@@ -54,10 +54,11 @@ int yylex();
 %token ADDRESS
 
 %%
-S:
-      X0
-    | X1
-    | X2
+S: 
+      S X0
+    | S X1
+    | S X2
+    | 
     ;
 
 X0:
