@@ -1,5 +1,5 @@
 #include "utils.h"
-#include "parser.h"
+#include "loader.h"
 #include "emulator_8085.h"
 
 int main(int argc, char* argv[]){
