@@ -1,10 +1,10 @@
 *.o
 emulator
-loader/lex.yy.c
-loader/parser.tab.c
-loader/parser.tab.h
-emu_objs/
-pars_objs/
+assembler/lex.yy.c
+assembler/parser.tab.c
+assembler/parser.tab.h
+comp_objs/
+asmb_objs/
 *.exe
 *.out
 *.log

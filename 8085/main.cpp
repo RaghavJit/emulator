@@ -1,6 +1,6 @@
 #include "utils.h"
-#include "loader.h"
-#include "emulator_8085.h"
+#include "assembler.h"
+#include "components.h"
 
 int main(int argc, char* argv[]){
     
