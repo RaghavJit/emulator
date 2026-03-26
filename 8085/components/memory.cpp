@@ -9,13 +9,7 @@ namespace emu_8085 {
     void clearMemory() {
         return;
     }
-    void saveMemory() {
-        return;
-    }
-    void loadMemory() {
-        return;
-    }
-
+    
 
 }       
 

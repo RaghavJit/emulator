@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <unordered_set>
+#include <unordered_map>
 using namespace std;
 
 #include "loader.h"
@@ -271,6 +272,18 @@ namespace emu_8085 {
         return result;
     }
 
+    std::string joinInst(std::vector<std::string> instruction){
+        std::string result;
+
+        for (size_t i = 0; i < instruction.size() - 1; ++i) {
+            result += instruction[i];
+            if (i != instruction.size() - 2) 
+                result += " ";
+        }
+
+        return result;
+    }
+
     std::vector<std::string> tokenize(const char* filepath) {
         std::vector<std::string> token_list;
         std::ifstream asm_file(filepath);
@@ -287,40 +300,42 @@ namespace emu_8085 {
         return token_list;
     }
 
-    std::vector<std::string> format(std::vector<std::string> token_list) {
-        std::vector<std::string> modified_token_list = {};
-        std::string instruction = "";
+    std::vector<std::vector<std::string>> format(std::vector<std::string> token_list) {
+        std::vector<std::vector<std::string>> modified_token_list = {};
+        std::vector<std::string> instruction = {};
 
         for (auto token : token_list) {
             if (keywords.count(token)) {
-                if (instruction != "") {
-                    instruction.erase(0, instruction.find_first_not_of(' '));
+                if (!instruction.empty()) {
                     modified_token_list.push_back(instruction);
-                    instruction = "";
+                    instruction.clear();
                 }
-                instruction = instruction + " " + token;
+                instruction.push_back(token);
                 continue;
             }
-            instruction = instruction + " " + token;
+            instruction.push_back(token);
         }
-        instruction.erase(0, instruction.find_first_not_of(' '));
         modified_token_list.push_back(instruction);
         return modified_token_list;
     }
 
     bool loadASM(const char* filepath) {
         std::vector<std::string> token_list = tokenize(filepath);
-        std::vector<std::string> modified_token_list = format(token_list);
-
-        for (const auto& row : modified_token_list) {
-            if (opcodes_1B.count(row)) {
-             } 
-            if (opcodes_2B.count(row.substr(0, row.find(' '));)) {
-             } 
-            if (opcodes_3B.count(row.substr(0, row.find(' '));)) {
-             } 
+        std::vector<std::vector<std::string>> modified_token_list = format(token_list);
+        
+        for(auto& row : modified_token_list) {
+            std::string match = joinInst(row);
+            std::cout<<"matching this: "<<match<<std::endl;
+            if (auto it = opcodes_1B.find(match + " " +row.back()); it!=opcodes_1B.end()) {
+                std::cout<<match<<"ok"<<std::endl;
+            }
+            else if (auto it = opcodes_2B.find(match); it!=opcodes_2B.end()) {
+                std::cout<<match<<row.back()<<std::endl;
+            }
+            else if (auto it = opcodes_3B.find(match); it!=opcodes_3B.end()) {
+                std::cout<<match<<row.back()<<std::endl;
+            }
         }
-
         return true;
     }
 

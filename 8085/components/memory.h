@@ -16,8 +16,6 @@ namespace emu_8085 {
         
         public:
             void clearMemory();
-            void saveMemory();
-            void loadMemory();
     };
     
 
