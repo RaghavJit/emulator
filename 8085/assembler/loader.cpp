@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <sstream>
 #include <iostream>
 #include <fstream>
 #include <unordered_set>
@@ -284,6 +285,18 @@ namespace emu_8085 {
         return result;
     }
 
+    uint8_t stringToUint8(std::string str) {
+        if (str.size() != 2) {
+            return UINT8_MAX; 
+        }
+        std::stringstream ss;
+        uint16_t value = 0;
+        ss << std::hex << str;
+        ss >> value;
+
+        return value;
+    }
+
     std::vector<std::string> tokenize(const char* filepath) {
         std::vector<std::string> token_list;
         std::ifstream asm_file(filepath);
@@ -319,22 +332,28 @@ namespace emu_8085 {
         return modified_token_list;
     }
 
-    bool loadASM(const char* filepath) {
+    bool loadASM(const char* filepath, const char* address) {
         std::vector<std::string> token_list = tokenize(filepath);
         std::vector<std::vector<std::string>> modified_token_list = format(token_list);
         
+        Memory pre_exec_memory;
+        uint16_t pointer = stringToUint16(address);
+
         for(auto& row : modified_token_list) {
             std::string match = joinInst(row);
-            std::cout<<"matching this: "<<match<<std::endl;
             if (auto it = opcodes_1B.find(match + " " +row.back()); it!=opcodes_1B.end()) {
-                std::cout<<match<<"ok"<<std::endl;
+                pointer = pre_exec_memory.saveToLocation(it->second, pointer);
             }
             else if (auto it = opcodes_2B.find(match); it!=opcodes_2B.end()) {
-                std::cout<<match<<row.back()<<std::endl;
+                pointer = pre_exec_memory.saveToLocation(it->second, pointer);
+                // load address/data
             }
             else if (auto it = opcodes_3B.find(match); it!=opcodes_3B.end()) {
-                std::cout<<match<<row.back()<<std::endl;
+                pointer = pre_exec_memory.saveToLocation(it->second, pointer);
+                // load address/data
             }
+            // handle lables and store
+            // store memory to file
         }
         return true;
     }

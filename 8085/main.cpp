@@ -21,7 +21,7 @@ int main(int argc, char* argv[]){
     }
 
     std::cout<<"Loading ASM into memory"<<std::endl;
-    if (!emu_8085::loadASM(argv[1])) {
+    if (!emu_8085::loadASM(argv[1], argv[2])) {
         std::cout<<"Error: Could not load ASM to memory!"<<std::endl;
         return 1;
     }
