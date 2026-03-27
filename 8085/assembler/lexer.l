@@ -49,9 +49,8 @@
 "HL"        return HL_REG;
 "SP"        return SP_REG;
 ","         return COMMA_VAL;
-";"         return SEMCOL_VAL;
-":"         return COLON_VAL;
-[A-Za-z_][A-Za-z0-9_]*          return LABEL_NAME;
+[A-Za-z_][A-Za-z0-9_]*:          return LABEL_NAME;
+[A-Za-z_][A-Za-z0-9_]*          return LABEL_VAL;
 ([1-7]|[567]\.5)        return RSTNUM_VALUE;
 [0-9A-Fa-f]{2}[Hh]    return DATA_VALUE;
 [0-9A-Fa-f]{4}[Hh]    return DATA16_VALUE;

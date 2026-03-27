@@ -6,9 +6,11 @@
 #include <fstream>
 #include <unordered_set>
 #include <unordered_map>
+#include <regex>
 using namespace std;
 
 #include "loader.h"
+#include "../components/memory.h"
 
 namespace emu_8085 {
 
@@ -290,11 +292,27 @@ namespace emu_8085 {
             return UINT8_MAX; 
         }
         std::stringstream ss;
-        uint16_t value = 0;
+        uint8_t value = 0;
         ss << std::hex << str;
         ss >> value;
 
         return value;
+    }
+
+    bool isLabel(std::string str) {
+        std::regex pattern("[a-zA-Z]+[a-zA-Z0-9]*:");
+        return std::regex_match(str, pattern);
+    }
+
+    bool is8hex(std::string str) {
+        std::regex pattern("[0-9A-Fa-f]{2}[Hh]");
+        return std::regex_match(str, pattern);
+    }
+
+    
+    bool is16hex(std::string str) {
+        std::regex pattern("[0-9A-Fa-f]{4}[Hh]");
+        return std::regex_match(str, pattern);
     }
 
     std::vector<std::string> tokenize(const char* filepath) {
@@ -305,9 +323,40 @@ namespace emu_8085 {
             return token_list; 
         }
 
-        std::string word;
-        while (asm_file >> word) {
-            token_list.push_back(sanitize(word));
+        std::string current;
+        bool in_comment = false;
+        char c;
+
+        while(asm_file.get(c)) {
+            if (in_comment) {
+                if (c == '\n' || c == '\r') {
+                    in_comment = false;
+                }
+                continue;
+            }
+            if (c == ';') {
+                if (!current.empty()) {
+                    token_list.push_back(current);
+                    current = "";
+                }
+                in_comment = true;
+                continue;
+            }
+            if (c == ' ' || c == '\t') {
+                if (!current.empty()) {
+                    token_list.push_back(current);
+                    current = "";
+                }
+                continue;
+            }
+            if (std::isalnum(static_cast<unsigned char>(c)) || c == ':') {
+                current += c;
+                continue;
+            }
+        }
+
+        if (!current.empty()) {
+            token_list.push_back(current);
         }
 
         return token_list;
@@ -317,44 +366,66 @@ namespace emu_8085 {
         std::vector<std::vector<std::string>> modified_token_list = {};
         std::vector<std::string> instruction = {};
 
-        for (auto token : token_list) {
-            if (keywords.count(token)) {
+        for (size_t i=0; i<token_list.size(); i++) {
+            if (isLabel(token_list[i])) {
                 if (!instruction.empty()) {
                     modified_token_list.push_back(instruction);
                     instruction.clear();
                 }
-                instruction.push_back(token);
+                instruction.push_back(token_list[i]);
+                if (i + 1 < token_list.size()) {
+                    instruction.push_back(token_list[++i]);
+                }
                 continue;
             }
-            instruction.push_back(token);
+            else if (keywords.count(token_list[i])) {
+                if (!instruction.empty()) {
+                    modified_token_list.push_back(instruction);
+                    instruction.clear();
+                }
+            }
+            instruction.push_back(token_list[i]);
         }
         modified_token_list.push_back(instruction);
         return modified_token_list;
     }
 
+//    std::vector<std::vector<std::string>> backpatch(std::vector<std::vector<std::string>> modified_token_list) {
+//        std::vector<std::vector<std::string>> backpatched_token_list = {};
+//    }
+
     bool loadASM(const char* filepath, const char* address) {
         std::vector<std::string> token_list = tokenize(filepath);
         std::vector<std::vector<std::string>> modified_token_list = format(token_list);
+//        std::vector<std::vector<std::string>> backpatched_token_list = backpatch(modified_token_list);
         
-        Memory pre_exec_memory;
-        uint16_t pointer = stringToUint16(address);
+//        emu_8085::Memory pre_exec_memory;
+//        uint8_t pointer = stringToUint8(address);
 
         for(auto& row : modified_token_list) {
             std::string match = joinInst(row);
-            if (auto it = opcodes_1B.find(match + " " +row.back()); it!=opcodes_1B.end()) {
-                pointer = pre_exec_memory.saveToLocation(it->second, pointer);
-            }
-            else if (auto it = opcodes_2B.find(match); it!=opcodes_2B.end()) {
-                pointer = pre_exec_memory.saveToLocation(it->second, pointer);
-                // load address/data
-            }
-            else if (auto it = opcodes_3B.find(match); it!=opcodes_3B.end()) {
-                pointer = pre_exec_memory.saveToLocation(it->second, pointer);
-                // load address/data
-            }
+            std::cout<<match<<" "<<row.back()<<std::endl;
+//            if (auto it = opcodes_1B.find(match + " " +row.back()); it!=opcodes_1B.end()) {
+//                pointer = pre_exec_memory.saveToLocation(it->second, pointer);
+//            }
+//            else if (auto it = opcodes_2B.find(match); it!=opcodes_2B.end()) {
+//                pointer = pre_exec_memory.saveToLocation(it->second, pointer);
+//            }
+//            else if (auto it = opcodes_3B.find(match); it!=opcodes_3B.end()) {
+//                pointer = pre_exec_memory.saveToLocation(it->second, pointer);
+//                for (char c : row.back()) {
+//                    std::string hex= "";
+//                    if (c=='H' || c=='h' || hex.length() == 2) {
+//                        pointer = pre_exec_memory.saveToLocation(stringToUint8(hex), pointer);
+//                        hex = "";
+//                    }
+//                    hex = hex + c;
+//                }
+//            }
             // handle lables and store
             // store memory to file
         }
+        //pre_exec_memory.saveMemory();
         return true;
     }
 

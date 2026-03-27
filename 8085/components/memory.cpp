@@ -1,23 +1,25 @@
 #include <cstdint>
 #include <array>
 #include <fstream>
+#include <iostream>
 
 #include "memory.h"
 
 namespace emu_8085 {
 
 
-    Memory::Memory(cost char* path){
-        ofstream file(path, ios::binary);
+    Memory::Memory(const char* path){
+        std::ifstream file(path, std::ios::binary);
         if (!file.is_open()) {
-            cerr
-                << "Error: Failed to open file for writing."
-                << endl;
+            std::cout<<"Error: Failed to open saved memory snapshot!"<<std::endl;
             return;
         }
-        file.write(reinterpret_cast<const char*>(this),
-                   sizeof(*this));
-        file.close();
+
+        file.read(reinterpret_cast<char*>(mem.data()), mem.size());
+
+        if (!file) {
+            std::cout << "Error: Memory incomplete!";
+        }
     }
 
     void Memory::clearMemory() {
@@ -38,6 +40,17 @@ namespace emu_8085 {
             return 0x00;
         }
         return mem[address];
+    }
+
+    void Memory::saveMemory(const char* path) {
+        std::ofstream file(path, std::ios::binary);
+        if (!file.is_open()) {
+            std::cout<< "Error: Failed to open file for writing!"<<std::endl;
+            return;
+        }
+        file.write(reinterpret_cast<const char*>(mem.data()), mem.size());
+        file.close(); 
+        return;
     }
 }       
 

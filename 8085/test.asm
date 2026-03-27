@@ -1,3 +1,2 @@
-LDA 1234H
-MOV A, B
-MVI A, 12H;
+start: LDA 1234H; MOV A, B; 
+end: MVI A, 12H;

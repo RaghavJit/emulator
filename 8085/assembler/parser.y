@@ -53,21 +53,20 @@ int yylex();
 %token DATA16_VALUE
 %token ADDRESS
 %token COMMA_VAL
-%token SEMCOL_VAL
-%token COLON_VAL 
 %token LABEL_NAME
+%token LABEL_VAL
 
 %%
 S: 
-     S LBL X0 SEMCOL
-    | S LBL X1 SEMCOL
-    | S LBL X2 SEMCOL
+     S LBL X0
+    | S LBL X1
+    | S LBL X2
     | 
     ;
 
 LBL:
      
-    | LABEL_NAME COLON
+    | LABEL_NAME
     ;
 
 X0:
@@ -142,21 +141,13 @@ DATA16:
 
 ADDR:
       DATA16_VALUE 
+      | LABEL_VAL
     ;
 
 COMMA: 
       
       | COMMA_VAL
       ;
-
-SEMCOL: 
-      
-      | SEMCOL_VAL
-      ;
-
-COLON: 
-     COLON_VAL
-     ;
 %%
 
 void yyerror(const char* s) {
