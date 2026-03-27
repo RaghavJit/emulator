@@ -250,69 +250,55 @@ namespace emu_8085 {
         {"LDA",  0x3A},
         {"LHLD", 0x2A},
 
-        {"LXI B",  0x01},
-        {"LXI D",  0x11},
-        {"LXI H",  0x21},
+        {"LXI BC",  0x01},
+        {"LXI DE",  0x11},
+        {"LXI HL",  0x21},
         {"LXI SP", 0x31},
 
         {"SHLD", 0x22},
         {"STA",  0x32}
     };
 
-    std::string sanitize(std::string str) {
-        std::string result;
-        for (char c : str) {
-            switch (c) {
-                case ',':
-                    break;
-                case ';':
-                    break;
-                default:
-                    result = result+c; 
-                    break;
-            }
-        }
-        return result;
-    }
-
-    std::string joinInst(std::vector<std::string> instruction){
-        std::string result;
-
-        for (size_t i = 0; i < instruction.size() - 1; ++i) {
-            result += instruction[i];
-            if (i != instruction.size() - 2) 
-                result += " ";
-        }
-
-        return result;
-    }
-
-    uint8_t stringToUint8(std::string str) {
-        if (str.size() != 2) {
-            return UINT8_MAX; 
-        }
-        std::stringstream ss;
-        uint8_t value = 0;
-        ss << std::hex << str;
-        ss >> value;
-
-        return value;
-    }
+    std::unordered_map<std::string, uint16_t> label_addresses = {};
 
     bool isLabel(std::string str) {
         std::regex pattern("[a-zA-Z]+[a-zA-Z0-9]*:");
         return std::regex_match(str, pattern);
     }
 
-    bool is8hex(std::string str) {
-        std::regex pattern("[0-9A-Fa-f]{2}[Hh]");
+    bool isLabelCall(std::string str) {
+        return (label_addresses.count(str) > 0);
+    }
+
+    bool isHex(std::string str) {
+        std::regex pattern("[0-9A-Fa-f]{2,4}[Hh]");
         return std::regex_match(str, pattern);
     }
 
-    
-    bool is16hex(std::string str) {
-        std::regex pattern("[0-9A-Fa-f]{4}[Hh]");
-        return std::regex_match(str, pattern);
+    std::string joinInst(std::vector<std::string> instruction){
+        std::string result;
+
+        for (size_t i = 0; i < instruction.size() - 1; ++i) {
+            if (isLabel(instruction[i])) {
+                continue;
+            }
+            result += instruction[i];
+            if (i != instruction.size() - 2) 
+                result += " ";
+        }
+        return result;
+    }
+
+    uint16_t stringToUint16(std::string str) {
+        if (str.size() != 4) {
+            return UINT16_MAX; 
+        }
+        std::stringstream ss;
+        uint16_t value = 0;
+        ss << std::hex << str;
+        ss >> value;
+
+        return value;
     }
 
     std::vector<std::string> tokenize(const char* filepath) {
@@ -342,7 +328,7 @@ namespace emu_8085 {
                 in_comment = true;
                 continue;
             }
-            if (c == ' ' || c == '\t') {
+            if (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
                 if (!current.empty()) {
                     token_list.push_back(current);
                     current = "";
@@ -373,6 +359,7 @@ namespace emu_8085 {
                     instruction.clear();
                 }
                 instruction.push_back(token_list[i]);
+                label_addresses.insert({instruction[0], modified_token_list.size()});
                 if (i + 1 < token_list.size()) {
                     instruction.push_back(token_list[++i]);
                 }
@@ -387,45 +374,50 @@ namespace emu_8085 {
             instruction.push_back(token_list[i]);
         }
         modified_token_list.push_back(instruction);
+
         return modified_token_list;
     }
 
-//    std::vector<std::vector<std::string>> backpatch(std::vector<std::vector<std::string>> modified_token_list) {
-//        std::vector<std::vector<std::string>> backpatched_token_list = {};
-//    }
-
     bool loadASM(const char* filepath, const char* address) {
+        int prog_size_tracker = 0;
         std::vector<std::string> token_list = tokenize(filepath);
         std::vector<std::vector<std::string>> modified_token_list = format(token_list);
-//        std::vector<std::vector<std::string>> backpatched_token_list = backpatch(modified_token_list);
         
-//        emu_8085::Memory pre_exec_memory;
-//        uint8_t pointer = stringToUint8(address);
+        emu_8085::Memory pre_exec_memory;
+        uint8_t pointer = stringToUint16(address);
 
         for(auto& row : modified_token_list) {
             std::string match = joinInst(row);
             std::cout<<match<<" "<<row.back()<<std::endl;
-//            if (auto it = opcodes_1B.find(match + " " +row.back()); it!=opcodes_1B.end()) {
-//                pointer = pre_exec_memory.saveToLocation(it->second, pointer);
-//            }
-//            else if (auto it = opcodes_2B.find(match); it!=opcodes_2B.end()) {
-//                pointer = pre_exec_memory.saveToLocation(it->second, pointer);
-//            }
-//            else if (auto it = opcodes_3B.find(match); it!=opcodes_3B.end()) {
-//                pointer = pre_exec_memory.saveToLocation(it->second, pointer);
-//                for (char c : row.back()) {
-//                    std::string hex= "";
-//                    if (c=='H' || c=='h' || hex.length() == 2) {
-//                        pointer = pre_exec_memory.saveToLocation(stringToUint8(hex), pointer);
-//                        hex = "";
-//                    }
-//                    hex = hex + c;
-//                }
-//            }
-            // handle lables and store
-            // store memory to file
+            if (auto it = opcodes_1B.find(match + " " +row.back()); it!=opcodes_1B.end()) {
+                pointer = pre_exec_memory.saveToLocation(it->second, pointer);
+                continue;
+            }
+            else if (auto it = opcodes_2B.find(match); it!=opcodes_2B.end()) {
+                pointer = pre_exec_memory.saveToLocation(it->second, pointer);
+            }
+            else if (auto it = opcodes_3B.find(match); it!=opcodes_3B.end()) {
+                pointer = pre_exec_memory.saveToLocation(it->second, pointer);
+            }
+
+            if (isHex(row.back())) {
+                if (row.back().size() == 3) {
+                    pointer = pre_exec_memory.saveToLocation((uint8_t)(stringToUint16(row.back()) >> 8), pointer);
+                std::cout<<"2hex:"<<row.back()<<std::endl;
+                }
+                else {
+                    pointer = pre_exec_memory.saveToLocation(stringToUint16(row.back()), pointer);
+                std::cout<<"4hex: "<<row.back()<<std::endl;
+                }
+            }
+            else if (isLabelCall(row.back()+":")) {
+                std::cout<<"labelCall: "<<label_addresses[row.back()+":"]+stringToUint16(address)<<std::endl;
+                //std::cout<<row.back()<<" "<<label_addresses[row.back()]<<endl;
+//                pointer = pre_exec_memory.saveToLocation(stringToUint16(label_addresses[row.back()] + stringToUint16(address)), pointer);
+            }
         }
-        //pre_exec_memory.saveMemory();
+//        pre_exec_memory.viewMemory(stringToUint16(address));
+//        pre_exec_memory.saveMemory("output.dat");
         return true;
     }
 

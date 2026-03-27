@@ -70,6 +70,7 @@ int yylex();
 %token SPHL_TOKEN
 %token XTHL_TOKEN
 %token JMP_TOKEN
+%token JC_TOKEN
 %token JNC_TOKEN
 %token JP_TOKEN
 %token JM_TOKEN
@@ -177,6 +178,7 @@ X1:
     | CPI_TOKEN DATA 
     | RST_TOKEN RSTNUM
     | JMP_TOKEN ADDR
+    | JC_TOKEN ADDR
     | JNC_TOKEN ADDR
     | JP_TOKEN ADDR
     | JM_TOKEN ADDR

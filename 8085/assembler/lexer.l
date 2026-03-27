@@ -55,6 +55,7 @@
 "LXI"       return LXI_TOKEN;
 "JMP"       return JMP_TOKEN;
 "JNC"       return JNC_TOKEN;
+"JC"       return JC_TOKEN;
 "JP"        return JP_TOKEN;
 "JM"        return JM_TOKEN;
 "JZ"        return JZ_TOKEN;

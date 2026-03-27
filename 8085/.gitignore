@@ -9,3 +9,4 @@ asmb_objs/
 *.out
 *.log
 test.asm
+output.dat

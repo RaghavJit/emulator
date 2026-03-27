@@ -4,8 +4,8 @@
 
 int main(int argc, char* argv[]){
     
-    if(argc > 2) {
-        std::cout <<"Error: More than one args were provided!"<<std::endl;
+    if(argc != 3) {
+        std::cout <<"Error: Takes two arguments: asm file and 16 bit address (120A)"<<std::endl;
         return 1;
     }
     

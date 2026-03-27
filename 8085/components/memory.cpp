@@ -8,6 +8,10 @@
 namespace emu_8085 {
 
 
+    Memory::Memory() {
+        mem.fill(0x00);  
+    }
+
     Memory::Memory(const char* path){
         std::ifstream file(path, std::ios::binary);
         if (!file.is_open()) {
@@ -35,6 +39,15 @@ namespace emu_8085 {
         return address + 1;
     }
 
+    uint16_t Memory::saveToLocation(uint16_t data, uint16_t address){
+        if (address+1 >= mem.size()) {
+            return address;
+        }
+        mem[address] = data & 0xFF;
+        mem[address] = (data >> 8) & 0xFF;
+        return address + 2;
+    }
+
     uint8_t Memory::getFromLocation(uint16_t address) {
         if (address >= mem.size()) {
             return 0x00;
@@ -51,6 +64,12 @@ namespace emu_8085 {
         file.write(reinterpret_cast<const char*>(mem.data()), mem.size());
         file.close(); 
         return;
+    }
+
+    void Memory::viewMemory(uint16_t address) {
+        for (uint16_t i = 0; i < 100; i++) {
+            std::cout<<mem[address+i]; 
+        }
     }
 }       
 
