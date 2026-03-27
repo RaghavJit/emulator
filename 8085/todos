@@ -1,12 +1,13 @@
 OK add loop and lables in parser syntax
 OK comma for multi args in parser
 
-write memory data structure
-write clear memory, memory save and reload (serialize and deserialize datastructure)
+OK write memory data structure
+OK write clear memory, memory save and reload (serialize and deserialize datastructure)
 
-tokenizer that breaks each instruction line into multiple tokens, then lookup tokens in unorderdmap to find opcodes
-write loader, read each line of file and put corresponding opcode at and address 
-return that opcode
+OK tokenizer that breaks each instruction line into multiple tokens, then lookup tokens in unorderdmap to find opcodes
+OK write loader, read each line of file and put corresponding opcode at and address 
+OK return that opcode
+backpatching algo, during loadASM push the cumulative address of current instruction to front of row, retrieve during isLabelCall check and add to address.
 
 write executor that creates register, memory, cu and bus objects 
 starts execution according to IF, ID, EX, WB cycle
