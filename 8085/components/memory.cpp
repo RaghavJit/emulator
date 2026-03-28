@@ -2,6 +2,7 @@
 #include <array>
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 
 #include "memory.h"
 
@@ -43,8 +44,8 @@ namespace emu_8085 {
         if (address+1 >= mem.size()) {
             return address;
         }
-        mem[address] = data & 0xFF;
         mem[address] = (data >> 8) & 0xFF;
+        mem[address+1] = data & 0xFF;
         return address + 2;
     }
 
@@ -68,7 +69,15 @@ namespace emu_8085 {
 
     void Memory::viewMemory(uint16_t address) {
         for (uint16_t i = 0; i < 100; i++) {
-            std::cout<<mem[address+i]; 
+            uint16_t value = mem[address + i];
+
+            std::cout << "0x"
+                      << std::hex << std::setw(2) << std::setfill('0')
+                      << std::uppercase
+                      << static_cast<int>(value & 0xFF)   // print only 1 byte
+                      << " ";
+
+            std::cout << std::dec;  // reset formatting
         }
     }
 }       

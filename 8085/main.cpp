@@ -5,7 +5,7 @@
 int main(int argc, char* argv[]){
     
     if(argc != 3) {
-        std::cout <<"Error: Takes two arguments: asm file and 16 bit address (120A)"<<std::endl;
+        std::cout <<"Error: Takes two arguments: asm file and 16 bit address (120AH)"<<std::endl;
         return 1;
     }
     

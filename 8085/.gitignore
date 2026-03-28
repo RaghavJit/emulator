@@ -8,5 +8,4 @@ asmb_objs/
 *.exe
 *.out
 *.log
-test.asm
 output.dat
