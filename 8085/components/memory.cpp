@@ -44,8 +44,8 @@ namespace emu_8085 {
         if (address+1 >= mem.size()) {
             return address;
         }
-        mem[address] = (data >> 8) & 0xFF;
-        mem[address+1] = data & 0xFF;
+        mem[address] = data & 0xFF;
+        mem[address+1] = (data >> 8) & 0xFF;
         return address + 2;
     }
 
